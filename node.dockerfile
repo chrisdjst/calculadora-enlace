@@ -1,27 +1,24 @@
 # Use a imagem Node.js mais recente
 FROM node:latest
 
-# Diretório de trabalho dentro do container
+# Diretório de trabalho no contêiner
 WORKDIR /app
 
-# Copiar package.json e package-lock.json para o container
+# Copie o package.json e package-lock.json para o contêiner
 COPY package*.json ./
+# Instale o Nest.js CLI globalmente
+RUN npm install -g @nestjs/cli
+#
+RUN npm cache clean --force
 
-# Instalar as dependências
+# Instale todas as dependências (incluindo devDependencies)
 RUN npm install
 
-# Copiar o restante dos arquivos para o container
+# Copie o código-fonte do projeto para o contêiner
 COPY . .
 
-# Compilar os arquivos TypeScript para JavaScript
-RUN npm run build
+# Adicione o diretório de instalação do Nest.js CLI ao caminho
+ENV PATH /app/node_modules/.bin:$PATH
 
-# Copiar os certificados SSL/TLS para o contêiner
-COPY private.key /app/private.key
-COPY public.crt /app/public.crt
-
-# Copiar o código compilado para o contêiner
-COPY dist /app/dist
-
-# Definir o comando de entrada como a execução do main.js (gerado a partir do main.ts)
-CMD [ "node", "/app/dist/main.js" ]
+# Comando de início do contêiner
+CMD ["npm", "run", "start:dev"]
